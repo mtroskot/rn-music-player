@@ -1,6 +1,6 @@
 # rn-music-player
 
-Music player for playing music from iOS's and Android's Music Library
+Music player for playing music from iOS's Music Library
 
 ## Installation
 
@@ -8,14 +8,39 @@ Music player for playing music from iOS's and Android's Music Library
 npm install rn-music-player
 ```
 
+### iOS
+
+```sh
+npm install react-native-swift
+react-native swiftify
+```
+
+Add to your info.plist
+```
+  <key>NSAppleMusicUsageDescription</key>
+  <string>{/*description*/}</string>
+```
+Min supported iOS version 10.3
+
+### Android
+coming soon...
+
 ## Usage
 
 ```js
-import RnMusicPlayer from "rn-music-player";
+import MusicPlayer, { MusicPlayerEvents } from 'rn-music-player';
+import type { PlayerState } from 'rn-music-player';
 
 // ...
-
-const result = await RnMusicPlayer.multiply(3, 7);
+useEffect(() => {
+  MusicPlayer.play();
+  MusicPlayerEvents.addListener('onSongChange', (playerState: PlayerState) => {
+    // handle song change
+  });
+  return () => {
+    MusicPlayerEvents.removeAllListeners('onSongChange');
+  };
+}, []);
 ```
 
 ## Contributing
