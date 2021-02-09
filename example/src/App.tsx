@@ -117,7 +117,7 @@ export default function App() {
       const response = await ApiService.callApi<TopChartsResponse>(
         AppleMusicRequests.fetchAlbumsAndSongsTopChartRequest(DEVELOPER_JWT_TOKEN)
       );
-      const topSongs = response.data.results.songs[0].data.map((song) => ({
+      const songs = response.data.results.songs[0].data.map((song) => ({
         id: song.id,
         albumName: song.attributes.albumName,
         artistName: song.attributes.artistName,
@@ -125,15 +125,15 @@ export default function App() {
         songUrl: song.attributes.url,
         songName: song.attributes.name,
       }));
-      setTopSongs(topSongs);
-      const topAlbums = response.data.results.albums[0].data.map((album) => ({
+      setTopSongs(songs);
+      const albums = response.data.results.albums[0].data.map((album) => ({
         id: album.id,
         albumName: album.attributes.name,
         artistName: album.attributes.artistName,
         artwork: convertArtworkUrlToImageUrl(album.attributes.artwork.url),
         songUrl: album.attributes.url,
       }));
-      setTopAlbums(topAlbums);
+      setTopAlbums(albums);
     } catch (error) {
       console.log('getTopCharts', error);
     }

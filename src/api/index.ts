@@ -31,7 +31,7 @@ const fetchAlbumByIdRequest = (albumId: number | string, JWT_KEY: string): IApiR
   options: { method: 'GET', headers: { Authorization: `Bearer ${JWT_KEY}` } },
 });
 
-const fetchArtistById = (artistId: number | string, JWT_KEY: string): IApiRequest => ({
+const fetchArtistByIdRequest = (artistId: number | string, JWT_KEY: string): IApiRequest => ({
   url: `${ARTIST_URL}/${artistId}?include=albums,songs`,
   options: { method: 'GET', headers: { Authorization: `Bearer ${JWT_KEY}` } },
 });
@@ -46,17 +46,17 @@ const searchRequest = (term: string, JWT_KEY: string): IApiRequest => ({
   options: { method: 'GET', headers: { Authorization: `Bearer ${JWT_KEY}` } },
 });
 
-const getUserPlaylists = (JWT_KEY: string, USER_TOKEN: string): IApiRequest => ({
+const getUserPlaylistsRequest = (JWT_KEY: string, USER_TOKEN: string): IApiRequest => ({
   url: `${USER_PLAYLISTS}`,
   options: { method: 'GET', headers: { 'Authorization': `Bearer ${JWT_KEY}`, 'Music-User-Token': USER_TOKEN } },
 });
 
-const getPlaylistInfo = (playlistId: string, JWT_KEY: string): IApiRequest => ({
+const getPlaylistInfoRequest = (playlistId: string, JWT_KEY: string): IApiRequest => ({
   url: `${PLAYLISTS}/${playlistId}`,
   options: { method: 'GET', headers: { Authorization: `Bearer ${JWT_KEY}` } },
 });
 
-const getMultiplePlaylistInfo = (playlistIds: string[], JWT_KEY: string): IApiRequest => ({
+const getMultiplePlaylistInfoRequest = (playlistIds: string[], JWT_KEY: string): IApiRequest => ({
   url: `${PLAYLISTS}/?ids=${playlistIds.join(',')}`,
   options: { method: 'GET', headers: { Authorization: `Bearer ${JWT_KEY}` } },
 });
@@ -66,10 +66,10 @@ export default {
   fetchGenresRequest,
   fetchSongByIdRequest,
   fetchAlbumByIdRequest,
-  fetchArtistById,
+  fetchArtistByIdRequest,
   fetchAlbumsAndSongsTopChartRequest,
   searchRequest,
-  getUserPlaylists,
-  getPlaylistInfo,
-  getMultiplePlaylistInfo,
+  getUserPlaylistsRequest,
+  getPlaylistInfoRequest,
+  getMultiplePlaylistInfoRequest,
 };
