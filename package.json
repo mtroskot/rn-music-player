@@ -34,7 +34,9 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "apple music",
+    "music player"
   ],
   "repository": "https://github.com/mtroskot/rn-music-player",
   "author": "Marko Troskot <marko.troskot@hotmail.com> (https://github.com/mtroskot)",
@@ -119,7 +121,8 @@
           "singleQuote": true,
           "tabWidth": 2,
           "trailingComma": "es5",
-          "useTabs": false
+          "useTabs": false,
+          "printWidth": 140
         }
       ]
     }
@@ -133,7 +136,8 @@
     "singleQuote": true,
     "tabWidth": 2,
     "trailingComma": "es5",
-    "useTabs": false
+    "useTabs": false,
+    "printWidth": 140
   },
   "react-native-builder-bob": {
     "source": "src",

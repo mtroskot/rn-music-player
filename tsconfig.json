@@ -2,7 +2,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "rn-music-player": ["./src/index"]
+      "rn-music-player": ["./src/index"],
+      "api": ["./src/api/*"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -10,7 +11,10 @@
     "importsNotUsedAsValues": "error",
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext",
+      "dom"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,

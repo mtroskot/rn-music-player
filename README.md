@@ -1,7 +1,7 @@
 # rn-music-player
 
-Music player for playing music from iOS's Music Library
-
+Music player for playing music from iOS's & Android Music Library.
+Premium Apple Music will be added this week.
 ## Installation
 
 ```sh
@@ -23,18 +23,22 @@ Add to your info.plist
 Min supported iOS version 10.3
 
 ### Android
-coming soon...
+coming implementation soon...
+
+Add to your AndroidManifest
+```
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+```
 
 ## Usage
 
 ```js
-import MusicPlayer, { MusicPlayerEvents } from 'rn-music-player';
-import type { PlayerState } from 'rn-music-player';
+import MusicPlayer, { MusicPlayerEvents, AppleMusicRequests, IPlayerState } from 'rn-music-player';
 
 // ...
 useEffect(() => {
   MusicPlayer.play();
-  MusicPlayerEvents.addListener('onSongChange', (playerState: PlayerState) => {
+  MusicPlayerEvents.addListener('onSongChange', (playerState: IPlayerState) => {
     // handle song change
   });
   return () => {
