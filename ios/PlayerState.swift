@@ -9,6 +9,7 @@
 import Foundation
 
 class PlayerState {
+    var playbackStoreID:String?
     var trackName:String?
     var author:String?
     var playbackDuration: TimeInterval
@@ -27,6 +28,7 @@ class PlayerState {
     
     func toRNEventBody()->[String:Any]{
         return [
+            "playbackStoreID":self.playbackStoreID,
             "trackName":self.trackName,
             "author":self.author,
             "playbackDuration":self.playbackDuration,

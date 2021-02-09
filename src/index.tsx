@@ -1,39 +1,247 @@
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import type { IMusicPlayer, IPlayerState, RepeatMode, ShuffleMode } from 'src/interfaces';
+import type { AuthorizationStatus } from 'src/interfaces';
+const { MusicPlayer } = NativeModules;
+export const MusicPlayerEvents = new NativeEventEmitter(MusicPlayer);
+export { default as AppleMusicRequests } from './api';
+export type { IPlayerState, RepeatMode, ShuffleMode };
 
-export type ShuffleMode = 'off' | 'songs' | 'albums';
-export type RepeatMode = 'none' | 'one' | 'all';
-export interface PlayerState {
-  trackName: string | null;
-  author: string | null;
-  playbackDuration: number;
-  playbackPosition: number;
-  isPlaying: boolean;
-  artwork: string;
+const Player = MusicPlayer as IMusicPlayer;
+const isIOS = Platform.OS === 'ios';
+
+function currentSongTitle(): Promise<string> {
+  if (isIOS) {
+    return Player.currentSongTitle();
+  } else {
+    throw new Error('Not implemented');
+  }
 }
 
-type MusicPlayerType = {
-  prepareToPlay(): Promise<void>;
-  isPreparedToPlay(): Promise<boolean>;
-  play(): Promise<void>;
-  pause(): Promise<void>;
-  stop(): Promise<void>;
-  next(): Promise<void>;
-  skipToBeginning(): Promise<void>;
-  previous(): Promise<void>;
-  currentSongTitle(): Promise<string>;
-  isPlaying(): Promise<boolean>;
-  setShuffleMode(shuffleMode: ShuffleMode): Promise<void>;
-  getShuffleMode(): Promise<ShuffleMode>;
-  setRepeatMode(repeatMode: RepeatMode): Promise<void>;
-  getRepeatMode(): Promise<RepeatMode>;
-  setPlaybackTime(timeInSeconds: number): Promise<RepeatMode>;
-  getPlaybackTime(): Promise<number>; // returns seconds
-  getCurrentPlaybackRate(): Promise<number>; // returns seconds
-  getPlaybackDuration(): Promise<number>; // returns seconds
-  getPlayerState(): Promise<PlayerState>; // returns seconds
-};
+function getCurrentPlaybackRate(): Promise<number> {
+  if (isIOS) {
+    return Player.getCurrentPlaybackRate();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
 
-const { MusicPlayer } = NativeModules;
-const MusicPlayerEvents = new NativeEventEmitter(MusicPlayer);
-export { MusicPlayerEvents };
-export default MusicPlayer as MusicPlayerType;
+function getPlaybackDuration(): Promise<number> {
+  if (isIOS) {
+    return Player.getPlaybackDuration();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getPlaybackTime(): Promise<number> {
+  if (isIOS) {
+    return Player.getPlaybackTime();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getPlayerState(): Promise<IPlayerState> {
+  if (isIOS) {
+    return Player.getPlayerState();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getRepeatMode(): Promise<RepeatMode> {
+  if (isIOS) {
+    return Player.getRepeatMode();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getShuffleMode(): Promise<ShuffleMode> {
+  if (isIOS) {
+    return Player.getShuffleMode();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function isPlaying(): Promise<boolean> {
+  if (isIOS) {
+    return Player.isPlaying();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function isPreparedToPlay(): Promise<boolean> {
+  if (isIOS) {
+    return Player.isPreparedToPlay();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function next(): Promise<void> {
+  if (isIOS) {
+    return Player.next();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function pause(): Promise<void> {
+  if (isIOS) {
+    return Player.pause();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function play(): Promise<void> {
+  if (isIOS) {
+    return Player.play();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function prepareToPlay(): Promise<void> {
+  if (isIOS) {
+    return Player.prepareToPlay();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function previous(): Promise<void> {
+  if (isIOS) {
+    return Player.previous();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function setPlaybackTime(timeInSeconds: number): Promise<RepeatMode> {
+  if (isIOS) {
+    return Player.setPlaybackTime(timeInSeconds);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function setRepeatMode(repeatMode: RepeatMode): Promise<void> {
+  if (isIOS) {
+    return Player.setRepeatMode(repeatMode);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function setShuffleMode(shuffleMode: ShuffleMode): Promise<void> {
+  if (isIOS) {
+    return Player.setShuffleMode(shuffleMode);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function skipToBeginning(): Promise<void> {
+  if (isIOS) {
+    return Player.skipToBeginning();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function stop(): Promise<void> {
+  if (isIOS) {
+    return Player.stop();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function checkIfPremiumApple(): Promise<boolean> {
+  if (isIOS) {
+    return Player.checkIfPremiumApple();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getStoreFrontCountryCode(): Promise<string> {
+  if (isIOS) {
+    return Player.getStoreFrontCountryCode();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function requestUserToken(developerToken: string): Promise<string> {
+  if (isIOS) {
+    return Player.requestUserToken(developerToken);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function requestAuthorization(): Promise<AuthorizationStatus> {
+  if (isIOS) {
+    return Player.requestAuthorization();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getAuthorizationStatus(): Promise<AuthorizationStatus> {
+  if (isIOS) {
+    return Player.getAuthorizationStatus();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function playSongById(songId: string): Promise<void> {
+  if (isIOS) {
+    return Player.playSongById(songId);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function setQueue(songIds: string[], startPlaying = false): Promise<void> {
+  if (isIOS) {
+    return Player.setQueue(songIds, startPlaying);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+export default {
+  currentSongTitle,
+  getCurrentPlaybackRate,
+  getPlaybackDuration,
+  getPlaybackTime,
+  getPlayerState,
+  getRepeatMode,
+  getShuffleMode,
+  isPlaying,
+  isPreparedToPlay,
+  next,
+  play,
+  pause,
+  prepareToPlay,
+  previous,
+  setPlaybackTime,
+  setRepeatMode,
+  setShuffleMode,
+  skipToBeginning,
+  stop,
+  checkIfPremiumApple,
+  getStoreFrontCountryCode,
+  requestUserToken,
+  requestAuthorization,
+  getAuthorizationStatus,
+  playSongById,
+  setQueue,
+};

@@ -1,56 +1,41 @@
-import React, { useEffect } from 'react';
-import {
-  Button,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  Image,
-} from 'react-native';
-import MusicPlayer, { MusicPlayerEvents } from 'rn-music-player';
-import type { PlayerState } from 'rn-music-player';
+import React, { useEffect, useRef, useState } from 'react';
+import { ImageSourcePropType, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import MusicPlayer, { AppleMusicRequests, IPlayerState, MusicPlayerEvents, RepeatMode, ShuffleMode } from 'rn-music-player';
+import ApiService from './api';
+import PlayerControls from './components/PlayerControls';
+import SongCover from './components/SongCover';
+import PlayerSlider from './components/PlayerSlider';
+import Playlist from './components/Playlist';
+import type { AuthorizationStatus } from 'src/interfaces';
+import type { Album, Song, SongResponse, TopChartsResponse } from './models/interfaces';
 
+const coverSize = 200;
+const DEVELOPER_JWT_TOKEN = 'YOUR_OWN_APPLE_DEVELOPER_TOKEN';
+let USER_TOKEN = '';
 export default function App() {
-  const [currentSongTitle, setCurrentSongTitle] = React.useState<null | string>(
-    null
-  );
-  const [isPlaying, setIsPlaying] = React.useState<boolean>(false);
-  const [shuffleMode, setShuffleMode] = React.useState<string | null>(null);
-  const [artwork, setArtwork] = React.useState<string | null>(null);
-  const [repeatMode, setRepeatMode] = React.useState<string | null>(null);
-  const [playbackTime, setPlaybackTime] = React.useState<string | null>(null);
-  const [playbackDuration, setPlaybackDuration] = React.useState<string | null>(
-    null
-  );
+  const [currentSongTitle, setCurrentSongTitle] = useState<null | string>(null);
+  const [author, setAuthor] = useState<null | string>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [shuffleMode, setShuffleMode] = useState<ShuffleMode | null>(null);
+  const [artwork, setArtwork] = useState<ImageSourcePropType | null>(null);
+  const [repeatMode, setRepeatMode] = useState<RepeatMode | null>(null);
+  const [playbackTime, setPlaybackTime] = useState<number | null>(null);
+  const [playbackDuration, setPlaybackDuration] = useState<number | null>(null);
+  const [topSongs, setTopSongs] = useState<Song[]>([]);
+  const [topAlbums, setTopAlbums] = useState<Album[]>([]);
+  const coverSetForCurrentSong = useRef(false);
+
   useEffect(() => {
+    requestAuthorization();
+    getShuffleMode();
+    getRepeatMode();
+    getUserToken();
+    getStoreFrontCode();
+    // AppleMusicRequests.setJWT(DEVELOPER_JWT_TOKEN);
     getPlayerState();
-    MusicPlayerEvents.addListener(
-      'onSongChange',
-      (playerState: PlayerState) => {
-        parsePlayerState(playerState);
-      }
-    );
-    MusicPlayerEvents.addListener('onPlay', (playerState: PlayerState) => {
-      parsePlayerState(playerState);
-    });
-    MusicPlayerEvents.addListener('onPause', (playerState: PlayerState) => {
-      parsePlayerState(playerState);
-    });
-    MusicPlayerEvents.addListener('onNext', (playerState: PlayerState) => {
-      parsePlayerState(playerState);
-    });
-    MusicPlayerEvents.addListener('onPrevious', (playerState: PlayerState) => {
-      parsePlayerState(playerState);
-    });
-    MusicPlayerEvents.addListener('onStop', (playerState: PlayerState) => {
-      parsePlayerState(playerState);
-    });
+    addListeners();
     return () => {
-      MusicPlayerEvents.removeAllListeners('onPlay');
-      MusicPlayerEvents.removeAllListeners('onPause');
-      MusicPlayerEvents.removeAllListeners('onNext');
-      MusicPlayerEvents.removeAllListeners('onPrevious');
-      MusicPlayerEvents.removeAllListeners('onStop');
+      removeListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -71,39 +56,132 @@ export default function App() {
     }
   }, [isPlaying]);
 
-  async function getNowPlaying() {
-    const result = await MusicPlayer.currentSongTitle();
-    setCurrentSongTitle(result);
-    await getPlaybackDuration();
+  function addListeners() {
+    MusicPlayerEvents.addListener('onSongChange', (playerState: IPlayerState) => {
+      coverSetForCurrentSong.current = false;
+      parsePlayerState(playerState);
+    });
+    MusicPlayerEvents.addListener('onPlay', (playerState: IPlayerState) => {
+      parsePlayerState(playerState);
+    });
+    MusicPlayerEvents.addListener('onPause', (playerState: IPlayerState) => {
+      parsePlayerState(playerState);
+    });
+    MusicPlayerEvents.addListener('onNext', (playerState: IPlayerState) => {
+      parsePlayerState(playerState);
+    });
+    MusicPlayerEvents.addListener('onPrevious', (playerState: IPlayerState) => {
+      parsePlayerState(playerState);
+    });
+    MusicPlayerEvents.addListener('onStop', (playerState: IPlayerState) => {
+      parsePlayerState(playerState);
+    });
+  }
+
+  function removeListeners() {
+    MusicPlayerEvents.removeAllListeners('onPlay');
+    MusicPlayerEvents.removeAllListeners('onPause');
+    MusicPlayerEvents.removeAllListeners('onNext');
+    MusicPlayerEvents.removeAllListeners('onPrevious');
+    MusicPlayerEvents.removeAllListeners('onStop');
+  }
+
+  async function getUserToken() {
+    const userToken = await MusicPlayer.requestUserToken(DEVELOPER_JWT_TOKEN);
+    USER_TOKEN = userToken;
+    console.log(USER_TOKEN);
+  }
+
+  async function getStoreFrontCode() {
+    const storeFront = await MusicPlayer.getStoreFrontCountryCode();
+    AppleMusicRequests.setStoreFront(storeFront);
+    await getTopCharts();
+  }
+  async function requestAuthorization() {
+    const authStatus = await MusicPlayer.getAuthorizationStatus();
+    if (authStatus === 'NOT_DETERMINED') {
+      const status = await MusicPlayer.requestAuthorization();
+      checkAuthorizationStatus(status);
+    }
+    checkAuthorizationStatus(authStatus);
+  }
+
+  function checkAuthorizationStatus(status: AuthorizationStatus) {
+    if (status === 'DENIED') {
+      alert("You won't be able to play music from your library without granting permissions");
+    }
+  }
+
+  async function getTopCharts() {
+    try {
+      const response = await ApiService.callApi<TopChartsResponse>(
+        AppleMusicRequests.fetchAlbumsAndSongsTopChartRequest(DEVELOPER_JWT_TOKEN)
+      );
+      const topSongs = response.data.results.songs[0].data.map((song) => ({
+        id: song.id,
+        albumName: song.attributes.albumName,
+        artistName: song.attributes.artistName,
+        artwork: convertArtworkUrlToImageUrl(song.attributes.artwork.url),
+        songUrl: song.attributes.url,
+        songName: song.attributes.name,
+      }));
+      setTopSongs(topSongs);
+      const topAlbums = response.data.results.albums[0].data.map((album) => ({
+        id: album.id,
+        albumName: album.attributes.name,
+        artistName: album.attributes.artistName,
+        artwork: convertArtworkUrlToImageUrl(album.attributes.artwork.url),
+        songUrl: album.attributes.url,
+      }));
+      setTopAlbums(topAlbums);
+    } catch (error) {
+      console.log('getTopCharts', error);
+    }
+  }
+
+  function convertArtworkUrlToImageUrl(artworkUrl: string) {
+    return artworkUrl.replace('{w}x{h}', `${coverSize}x${coverSize}`);
+  }
+
+  async function getSongById(songId: string) {
+    try {
+      const response = await ApiService.callApi<SongResponse>(AppleMusicRequests.fetchSongByIdRequest(songId, DEVELOPER_JWT_TOKEN));
+      setArtwork({ uri: convertArtworkUrlToImageUrl(response.data.data[0].attributes.artwork.url) });
+    } catch (error) {
+      setArtwork(null);
+    } finally {
+      coverSetForCurrentSong.current = true;
+    }
   }
 
   async function getPlaybackTime() {
     const result = await MusicPlayer.getPlaybackTime();
-    setPlaybackTime(secondsToPlayTimeString(result));
+    setPlaybackTime(result);
   }
 
   async function getPlayerState() {
-    const playerState: PlayerState = await MusicPlayer.getPlayerState();
+    const playerState: IPlayerState = await MusicPlayer.getPlayerState();
     parsePlayerState(playerState);
   }
 
-  function parsePlayerState(playerState: PlayerState) {
-    console.log(playerState);
-    setPlaybackTime(secondsToPlayTimeString(playerState.playbackPosition));
-    setPlaybackDuration(secondsToPlayTimeString(playerState.playbackDuration));
+  function parsePlayerState(playerState: IPlayerState) {
+    setPlaybackTime(playerState.playbackPosition);
+    setPlaybackDuration(playerState.playbackDuration);
     setCurrentSongTitle(playerState.trackName);
+    setAuthor(playerState.author);
     setIsPlaying(playerState.isPlaying);
-    setArtwork(playerState.artwork);
+    if (coverSetForCurrentSong.current === false) {
+      if (playerState.playbackStoreID !== '0' && playerState.artwork === null) {
+        getSongById(playerState.playbackStoreID);
+      } else {
+        setArtwork(playerState.artwork ? { uri: `data:image/png;base64,${playerState.artwork}` } : null);
+      }
+    }
   }
 
   async function getPlaybackDuration() {
     const result = await MusicPlayer.getPlaybackDuration();
-    setPlaybackDuration(secondsToPlayTimeString(result));
-  }
-
-  async function checkIfPlaying() {
-    const result = await MusicPlayer.isPlaying();
-    setIsPlaying(result);
+    setPlaybackDuration(result);
   }
 
   async function getShuffleMode() {
@@ -116,70 +194,73 @@ export default function App() {
     setRepeatMode(result);
   }
 
-  async function changeShuffleMode() {
+  async function onShufflePress() {
     await MusicPlayer.setShuffleMode(shuffleMode === 'off' ? 'songs' : 'off');
     await getShuffleMode();
   }
 
-  async function changeRepeatMode() {
-    await MusicPlayer.setRepeatMode(
-      repeatMode === 'all' ? 'none' : repeatMode === 'none' ? 'one' : 'all'
-    );
+  async function onRepeatPress() {
+    await MusicPlayer.setRepeatMode(repeatMode === 'all' ? 'none' : repeatMode === 'none' ? 'one' : 'all');
     await getRepeatMode();
   }
 
-  async function prepareToPlay() {
-    await MusicPlayer.prepareToPlay();
+  async function onTogglePlayPress() {
+    if (isPlaying) {
+      await MusicPlayer.pause();
+    } else {
+      await MusicPlayer.play();
+    }
   }
 
-  async function play() {
-    await MusicPlayer.play();
-  }
-
-  async function stop() {
-    await MusicPlayer.stop();
-  }
-
-  async function pause() {
-    await MusicPlayer.pause();
-  }
-  async function next() {
+  async function onNextPress() {
     await MusicPlayer.next();
   }
-  async function previous() {
+  async function onPreviousPress() {
     await MusicPlayer.previous();
   }
 
-  async function seek() {
-    await MusicPlayer.setPlaybackTime(10 * 6);
+  async function seek(value: number) {
+    if (playbackDuration) {
+      await MusicPlayer.setPlaybackTime(playbackDuration * value);
+    }
+  }
+
+  async function playSongById(songId: string) {
+    await MusicPlayer.playSongById(songId);
+  }
+  async function onPlayAllTopSongsPress() {
+    await MusicPlayer.setQueue(
+      topSongs.map((song) => song.id),
+      true
+    );
   }
 
   return (
     <SafeAreaView style={styles.flex}>
       <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
-        <Image
-          style={{ width: 200, height: 200 }}
-          source={{ uri: `data:image/png;base64,${artwork}` }}
+        <SongCover artistName={author} songTitle={currentSongTitle} image={artwork} />
+        <PlayerSlider
+          sliderValue={playbackTime !== null && playbackDuration ? playbackTime / playbackDuration : 0}
+          playbackDuration={secondsToPlayTimeString(playbackDuration)}
+          playbackTime={secondsToPlayTimeString(playbackTime)}
+          onSlidingComplete={seek}
+          isDisabled={playbackDuration === 0}
         />
-        <Text>Now playing: {currentSongTitle}</Text>
-        <Text>Is playing: {isPlaying.toString()}</Text>
-        <Text>Repeat mode: {repeatMode}</Text>
-        <Text>Shuffle mode: {shuffleMode}</Text>
-        <Text>Playback time: {playbackTime}</Text>
-        <Text>Playback duration: {playbackDuration}</Text>
-        <Button title={'Prepare To Play'} onPress={prepareToPlay} />
-        <Button title={'Play Music'} onPress={play} />
-        <Button title={'Pause Music'} onPress={pause} />
-        <Button title={'Stop Music'} onPress={stop} />
-        <Button title={'Next Music'} onPress={next} />
-        <Button title={'Previous Music'} onPress={previous} />
-        <Button title={'CheckIf playing'} onPress={checkIfPlaying} />
-        <Button title={'Now playing'} onPress={getNowPlaying} />
-        <Button title={'getRepeatMode'} onPress={getRepeatMode} />
-        <Button title={'getShuffleMode'} onPress={getShuffleMode} />
-        <Button title={'changeRepeatMode'} onPress={changeRepeatMode} />
-        <Button title={'changeShuffleMode'} onPress={changeShuffleMode} />
-        <Button title={'Set Playback To 1 Minute'} onPress={seek} />
+        <PlayerControls
+          {...{ repeatMode, shuffleMode, isPlaying, onShufflePress, onRepeatPress, onTogglePlayPress, onNextPress, onPreviousPress }}
+        />
+        <View style={styles.topSongsTitleWrapper}>
+          <TouchableOpacity onPress={onPlayAllTopSongsPress}>
+            <Text style={styles.title}>Play all</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Top Songs</Text>
+          <Text style={[styles.title, { opacity: 0 }]}>Play all</Text>
+        </View>
+        <Playlist data={topSongs} onItemPress={playSongById} />
+        <View>
+          <Text style={styles.title}>Top Albums</Text>
+        </View>
+        <Playlist data={topAlbums} onItemPress={() => {}} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -188,6 +269,7 @@ export default function App() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
+    marginTop: 20,
   },
   container: {
     alignItems: 'center',
@@ -198,13 +280,25 @@ const styles = StyleSheet.create({
     height: 60,
     marginVertical: 20,
   },
+  divider: { marginVertical: 10 },
+  title: {
+    fontSize: 24,
+  },
+  topSongsTitleWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '95%',
+    marginTop: 20,
+  },
 });
 
-function secondsToPlayTimeString(seconds: number) {
+function secondsToPlayTimeString(seconds: number | null) {
+  if (typeof seconds !== 'number') {
+    return '0:00';
+  }
   const flooredSeconds = Math.floor(seconds);
   const minutes = Math.floor(flooredSeconds / 60);
-  const playTimeSeconds =
-    flooredSeconds % 60 === 0 ? 0 : flooredSeconds - minutes * 60;
+  const playTimeSeconds = flooredSeconds % 60 === 0 ? 0 : flooredSeconds - minutes * 60;
   return `${minutes}:${convertShortTimeToLongTime(playTimeSeconds)}`;
 }
 
