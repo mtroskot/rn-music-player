@@ -1,6 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import type { IMusicPlayer, IPlayerState, RepeatMode, ShuffleMode } from 'src/interfaces';
-import type { AuthorizationStatus } from 'src/interfaces';
+import type { IMusicPlayer, IPlayerState, RepeatMode, ShuffleMode, AuthorizationStatus } from 'src/interfaces';
 import AppleMusicRequests from './api';
 const { MusicPlayer } = NativeModules;
 
@@ -217,7 +216,7 @@ function setQueue(songIds: string[], startPlaying = false): Promise<void> {
 
 const MusicPlayerEvents = new NativeEventEmitter(MusicPlayer);
 export { AppleMusicRequests, MusicPlayerEvents };
-export type { IPlayerState, RepeatMode, ShuffleMode, IMusicPlayer };
+export type { IPlayerState, RepeatMode, ShuffleMode, IMusicPlayer, AuthorizationStatus };
 export default {
   currentSongTitle,
   getCurrentPlaybackRate,
