@@ -1,5 +1,5 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import type { IMusicPlayer, IPlayerState, RepeatMode, ShuffleMode, AuthorizationStatus } from 'src/interfaces';
+import type { IMusicPlayer, IPlayerState, RepeatMode, ShuffleMode, AuthorizationStatus } from './interfaces';
 import AppleMusicRequests from './api';
 const { MusicPlayer } = NativeModules;
 
