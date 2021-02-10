@@ -69,9 +69,13 @@ class MusicPlayer: RCTEventEmitter {
         playerState.playbackPosition=Float(player.currentPlaybackTime)
         playerState.playbackDuration=player.nowPlayingItem?.playbackDuration ?? 0
         playerState.isPlaying=player.playbackState == MPMusicPlaybackState.playing
-        var image=player.nowPlayingItem?.artwork?.image(at: CGSize(width: 240, height: 240))
-        let imageData=image?.jpegData(compressionQuality: 1.0)
-        playerState.artwork=imageData?.base64EncodedString()
+         let image=player.nowPlayingItem?.artwork?.image(at: CGSize(width: 240, height: 240))
+        if(image?.size.width != 0){
+            let imageData=image?.jpegData(compressionQuality: 1.0)
+            playerState.artwork=imageData?.base64EncodedString()
+        }else{
+            playerState.artwork=nil
+        }
     }
     
     

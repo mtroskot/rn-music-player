@@ -24,6 +24,8 @@ Add to your info.plist
   <string>{/*description*/}</string>
 ```
 
+Set Swift version to 4.2 or higher.
+
 Min supported iOS version 10.3
 
 ### Android
