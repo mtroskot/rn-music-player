@@ -1,13 +1,13 @@
 export type ShuffleMode = 'off' | 'songs' | 'albums';
 export type RepeatMode = 'none' | 'one' | 'all';
 export interface IPlayerState {
-  playbackStoreID: string;
+  playbackStoreID: string | null;
   trackName: string | null;
   author: string | null;
   playbackDuration: number;
   playbackPosition: number;
   isPlaying: boolean;
-  artwork: string;
+  artwork: string | null;
 }
 export interface IApiRequest {
   url: string;

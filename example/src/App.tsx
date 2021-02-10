@@ -12,6 +12,7 @@ import type { Album, Song, SongResponse, TopChartsResponse } from './models/inte
 const coverSize = 200;
 const DEVELOPER_JWT_TOKEN = 'YOUR_OWN_APPLE_DEVELOPER_TOKEN';
 let USER_TOKEN = '';
+let STORE_FRONT = 'us';
 export default function App() {
   const [currentSongTitle, setCurrentSongTitle] = useState<null | string>(null);
   const [author, setAuthor] = useState<null | string>(null);
@@ -31,7 +32,6 @@ export default function App() {
     getRepeatMode();
     getUserToken();
     getStoreFrontCode();
-    // AppleMusicRequests.setJWT(DEVELOPER_JWT_TOKEN);
     getPlayerState();
     addListeners();
     return () => {
@@ -94,7 +94,7 @@ export default function App() {
 
   async function getStoreFrontCode() {
     const storeFront = await MusicPlayer.getStoreFrontCountryCode();
-    AppleMusicRequests.setStoreFront(storeFront);
+    STORE_FRONT = storeFront;
     await getTopCharts();
   }
   async function requestAuthorization() {
@@ -115,7 +115,7 @@ export default function App() {
   async function getTopCharts() {
     try {
       const response = await ApiService.callApi<TopChartsResponse>(
-        AppleMusicRequests.fetchAlbumsAndSongsTopChartRequest(DEVELOPER_JWT_TOKEN)
+        AppleMusicRequests.fetchAlbumsAndSongsTopChartRequest(DEVELOPER_JWT_TOKEN, STORE_FRONT)
       );
       const songs = response.data.results.songs[0].data.map((song) => ({
         id: song.id,
@@ -145,7 +145,9 @@ export default function App() {
 
   async function getSongById(songId: string) {
     try {
-      const response = await ApiService.callApi<SongResponse>(AppleMusicRequests.fetchSongByIdRequest(songId, DEVELOPER_JWT_TOKEN));
+      const response = await ApiService.callApi<SongResponse>(
+        AppleMusicRequests.fetchSongByIdRequest(songId, DEVELOPER_JWT_TOKEN, STORE_FRONT)
+      );
       setArtwork({ uri: convertArtworkUrlToImageUrl(response.data.data[0].attributes.artwork.url) });
     } catch (error) {
       setArtwork(null);
@@ -171,7 +173,7 @@ export default function App() {
     setAuthor(playerState.author);
     setIsPlaying(playerState.isPlaying);
     if (coverSetForCurrentSong.current === false) {
-      if (playerState.playbackStoreID !== '0' && playerState.artwork === null) {
+      if (playerState.playbackStoreID !== '0' && playerState.playbackStoreID && playerState.artwork === null) {
         getSongById(playerState.playbackStoreID);
       } else {
         setArtwork(playerState.artwork ? { uri: `data:image/png;base64,${playerState.artwork}` } : null);

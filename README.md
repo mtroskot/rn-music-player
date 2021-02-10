@@ -85,7 +85,6 @@ The module also exports **AppleMusicRequests**, which contains predefined reques
 
 | AppleMusicRequests                       |
 | ---------------------------------------- |
-| **`setStoreFront`**                      |
 | **`fetchGenresRequest`**                 |
 | **`fetchSongByIdRequest`**               |
 | **`fetchAlbumByIdRequest`**              |
