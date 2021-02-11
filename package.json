@@ -1,6 +1,6 @@
 {
   "name": "rn-music-player",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Music player for playing music from iOS's and Android's Music Library",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
