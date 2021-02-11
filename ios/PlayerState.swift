@@ -26,15 +26,15 @@ class PlayerState {
         self.artwork=nil
     }
     
-    func toRNEventBody()->[String:Any]{
+    func toObject()->[String:Any]{
         return [
-            "playbackStoreID":self.playbackStoreID,
-            "trackName":self.trackName,
-            "author":self.author,
+            "playbackStoreID":self.playbackStoreID ?? "",
+            "trackName":self.trackName ?? "",
+            "author":self.author ?? "",
             "playbackDuration":self.playbackDuration,
             "playbackPosition":self.playbackPosition,
             "isPlaying":self.isPlaying,
-            "artwork":self.artwork
+            "artwork":self.artwork as Any
         ]
     }
 }

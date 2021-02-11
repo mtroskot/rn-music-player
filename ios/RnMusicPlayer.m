@@ -17,7 +17,7 @@ RCT_EXTERN_METHOD(play:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(playSongById:(NSString)songId withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(setQueue:(NSArray)songIds withStartPlaying:(BOOL)startPlaying withResolver:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(setQueue:(NSArray)songIds withStartPlaying:(BOOL)startPlaying withStartID:(NSString)startID withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(pause:(RCTPromiseResolveBlock)resolve
@@ -59,11 +59,11 @@ RCT_EXTERN_METHOD(getPlaybackTime:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(setPlaybackTime:(float)time withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-//RCT_EXTERN_METHOD(getVolume:(RCTPromiseResolveBlock)resolve
-//                  withRejecter:(RCTPromiseRejectBlock)reject)
-//
-//RCT_EXTERN_METHOD(setVolume:(float)volume withResolver:(RCTPromiseResolveBlock)resolve
-//                  withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(getVolume:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setVolume:(float)volume withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(getCurrentPlaybackRate:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
@@ -87,5 +87,11 @@ RCT_EXTERN_METHOD(requestAuthorization:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(getAuthorizationStatus:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getUserPlaylists:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getUserSongs:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 @end

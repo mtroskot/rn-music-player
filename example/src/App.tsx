@@ -1,12 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ImageSourcePropType, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MusicPlayer, { AppleMusicRequests, IPlayerState, MusicPlayerEvents, RepeatMode, ShuffleMode } from 'rn-music-player';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ImageSourcePropType, ListRenderItem, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
+import MusicPlayer, { AppleMusicRequests, IPlayerState, MusicPlayerEvents, RepeatMode, ShuffleMode, UserPlaylist } from 'rn-music-player';
 import ApiService from './api';
 import PlayerControls from './components/PlayerControls';
 import SongCover from './components/SongCover';
 import PlayerSlider from './components/PlayerSlider';
-import Playlist from './components/Playlist';
-import type { AuthorizationStatus } from 'src/interfaces';
+import AlbumItem from './components/Album';
+import SongItem from './components/Song';
+import PlaylistSection from './components/PlaylistSection';
+import VolumeSlider from './components/VolumeSlider';
+import type { AuthorizationStatus, UserPlaylistItem } from 'src/interfaces';
 import type { Album, Song, SongResponse, TopChartsResponse } from './models/interfaces';
 
 const coverSize = 200;
@@ -24,14 +27,18 @@ export default function App() {
   const [playbackDuration, setPlaybackDuration] = useState<number | null>(null);
   const [topSongs, setTopSongs] = useState<Song[]>([]);
   const [topAlbums, setTopAlbums] = useState<Album[]>([]);
+  const [userPlaylists, setUserPlaylists] = useState<UserPlaylist[]>([]);
+  const [userSongs, setUserSongs] = useState<UserPlaylistItem[]>([]);
+  const [volume, setVolume] = useState(0);
   const coverSetForCurrentSong = useRef(false);
 
   useEffect(() => {
+    getVolume();
+    getUserPlaylists();
+    getUserSongs();
     requestAuthorization();
     getShuffleMode();
     getRepeatMode();
-    getUserToken();
-    getStoreFrontCode();
     getPlayerState();
     addListeners();
     return () => {
@@ -76,6 +83,9 @@ export default function App() {
     MusicPlayerEvents.addListener('onStop', (playerState: IPlayerState) => {
       parsePlayerState(playerState);
     });
+    MusicPlayerEvents.addListener('systemVolumeDidChange', (volume: number) => {
+      setVolume(volume);
+    });
   }
 
   function removeListeners() {
@@ -84,6 +94,25 @@ export default function App() {
     MusicPlayerEvents.removeAllListeners('onNext');
     MusicPlayerEvents.removeAllListeners('onPrevious');
     MusicPlayerEvents.removeAllListeners('onStop');
+    MusicPlayerEvents.removeAllListeners('systemVolumeDidChange');
+  }
+
+  async function getVolume() {
+    const volume = await MusicPlayer.getVolume();
+    setVolume(volume);
+  }
+  async function getUserPlaylists() {
+    const result = await MusicPlayer.getUserPlaylists();
+    if (result) {
+      setUserPlaylists(result);
+    }
+  }
+
+  async function getUserSongs() {
+    const result = await MusicPlayer.getUserSongs();
+    if (result) {
+      setUserSongs(result);
+    }
   }
 
   async function getUserToken() {
@@ -102,6 +131,9 @@ export default function App() {
     if (authStatus === 'NOT_DETERMINED') {
       const status = await MusicPlayer.requestAuthorization();
       checkAuthorizationStatus(status);
+    } else if (authStatus === 'AUTHORIZED') {
+      await getUserToken();
+      await getStoreFrontCode();
     }
     checkAuthorizationStatus(authStatus);
   }
@@ -227,15 +259,65 @@ export default function App() {
     }
   }
 
+  const onVolumeSlide = useCallback(async (value: number) => {
+    setVolume(value);
+    await MusicPlayer.setVolume(value);
+  }, []);
+
   async function playSongById(songId: string) {
     await MusicPlayer.playSongById(songId);
   }
-  async function onPlayAllTopSongsPress() {
-    await MusicPlayer.setQueue(
-      topSongs.map((song) => song.id),
-      true
-    );
+
+  function onAlbumPress(albumId: string) {
+    console.log(albumId);
   }
+
+  // async function onPlayAllTopSongsPress() {
+  //   await MusicPlayer.setQueue(
+  //     topSongs.map((song) => song.id),
+  //     true
+  //   );
+  // }
+
+  const renderSongItem: ListRenderItem<Song> = useCallback(({ item }) => {
+    return (
+      <SongItem
+        onPress={() => playSongById(item.id)}
+        imageUrl={item.artwork}
+        album={item.albumName}
+        artist={item.artistName}
+        song={item.songName}
+      />
+    );
+  }, []);
+
+  const renderAlbumItem: ListRenderItem<Album> = useCallback(({ item }) => {
+    return <AlbumItem onPress={() => onAlbumPress(item.id)} imageUrl={item.artwork} album={item.albumName} artist={item.artistName} />;
+  }, []);
+
+  const renderUserPlaylists: ListRenderItem<UserPlaylist> = useCallback(({ item }) => {
+    return <AlbumItem onPress={() => onAlbumPress(item.persistentID)} imageUrl={item.artwork} album={item.name} />;
+  }, []);
+
+  const renderUserSongs: ListRenderItem<UserPlaylistItem> = useCallback(
+    ({ item, index }) => {
+      return (
+        <SongItem
+          onPress={() =>
+            MusicPlayer.setQueue(
+              userSongs.map((_, index) => index.toString()),
+              true,
+              index.toString()
+            )
+          }
+          song={item.title}
+          artist={item.artist}
+          album={item.albumTitle}
+        />
+      );
+    },
+    [userSongs]
+  );
 
   return (
     <SafeAreaView style={styles.flex}>
@@ -251,18 +333,21 @@ export default function App() {
         <PlayerControls
           {...{ repeatMode, shuffleMode, isPlaying, onShufflePress, onRepeatPress, onTogglePlayPress, onNextPress, onPreviousPress }}
         />
-        <View style={styles.topSongsTitleWrapper}>
-          <TouchableOpacity onPress={onPlayAllTopSongsPress}>
-            <Text style={styles.title}>Play all</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Top Songs</Text>
-          <Text style={[styles.title, { opacity: 0 }]}>Play all</Text>
-        </View>
-        <Playlist data={topSongs} onItemPress={playSongById} />
-        <View>
-          <Text style={styles.title}>Top Albums</Text>
-        </View>
-        <Playlist data={topAlbums} onItemPress={() => {}} />
+        <VolumeSlider volume={volume} onSlide={onVolumeSlide} />
+        <PlaylistSection data={topSongs} renderItem={renderSongItem} keyExtractor={(item: Song) => item.id} title={'Top Songs'} />
+        <PlaylistSection data={topAlbums} renderItem={renderAlbumItem} keyExtractor={(item: Album) => item.id} title={'Top Albums'} />
+        <PlaylistSection
+          data={userPlaylists}
+          renderItem={renderUserPlaylists}
+          keyExtractor={(item: UserPlaylist) => item.persistentID}
+          title={'User Playlists'}
+        />
+        <PlaylistSection
+          data={userSongs}
+          renderItem={renderUserSongs}
+          keyExtractor={(item: UserPlaylistItem) => item.persistentID}
+          title={'User Songs'}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -276,15 +361,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
-  },
-  divider: { marginVertical: 10 },
-  title: {
-    fontSize: 24,
   },
   topSongsTitleWrapper: {
     flexDirection: 'row',

@@ -298,7 +298,7 @@ PODS:
     - React-Core (= 0.63.4)
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
-  - rn-music-player (0.1.4):
+  - rn-music-player (0.1.11):
     - React-Core
   - RNVectorIcons (8.0.0):
     - React-Core
@@ -471,7 +471,7 @@ SPEC CHECKSUMS:
   React-RCTText: 5c51df3f08cb9dedc6e790161195d12bac06101c
   React-RCTVibration: ae4f914cfe8de7d4de95ae1ea6cc8f6315d73d9d
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
-  rn-music-player: 9d99ee016fb53f2e8ba00581e04b56e3945b34bb
+  rn-music-player: 718649518c77894d3854b3cd53ce24c52a0cc841
   RNVectorIcons: f67a1abce2ec73e62fe4606e8110e95a832bc859
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a

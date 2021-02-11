@@ -26,7 +26,7 @@ class MusicPlayer: RCTEventEmitter {
     }
     
     @objc override func supportedEvents() -> [String]! {
-        return ["onPlay","onPause", "onNext","onStop", "onPrevious","onSongChange",];
+        return ["onPlay","onPause", "onNext","onStop", "onPrevious","onSongChange","systemVolumeDidChange"];
     }
     
     // Will be called when this module's first listener is added.
@@ -53,11 +53,18 @@ class MusicPlayer: RCTEventEmitter {
             name: .MPMusicPlayerControllerPlaybackStateDidChange,
             object: player
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.systemVolumeDidChange),
+            name: .MPMusicPlayerControllerVolumeDidChange,
+            object: player
+        )
     }
     
     private func removeObservers(){
         NotificationCenter.default.removeObserver(self, name: .MPMusicPlayerControllerNowPlayingItemDidChange, object: player)
         NotificationCenter.default.removeObserver(self, name: .MPMusicPlayerControllerPlaybackStateDidChange, object: player)
+        NotificationCenter.default.removeObserver(self, name: .MPMusicPlayerControllerVolumeDidChange, object: player)
     }
     
     private func updatePlayerState(){
@@ -69,20 +76,32 @@ class MusicPlayer: RCTEventEmitter {
         playerState.playbackPosition=Float(player.currentPlaybackTime)
         playerState.playbackDuration=player.nowPlayingItem?.playbackDuration ?? 0
         playerState.isPlaying=player.playbackState == MPMusicPlaybackState.playing
-         let image=player.nowPlayingItem?.artwork?.image(at: CGSize(width: 240, height: 240))
-        if(image?.size.width != 0){
-            let imageData=image?.jpegData(compressionQuality: 1.0)
-            playerState.artwork=imageData?.base64EncodedString()
-        }else{
-            playerState.artwork=nil
-        }
+        playerState.artwork=MusicPlayer.artworkToBase64(artwork: player.nowPlayingItem?.artwork)
     }
     
+    public static func artworkToBase64(artwork:MPMediaItemArtwork?)->String?{
+        let image=artwork?.image(at: CGSize(width: 120, height: 120))
+        if(image?.size.width != 0){
+            let imageData=image?.jpegData(compressionQuality: 1.0)
+            return imageData?.base64EncodedString()
+        }else{
+            return nil
+        }
+    }
     
     @objc private func systemSongDidChange(notification: Notification) {
         if(self.hasListeners){
             updatePlayerState()
-            emitter.sendEvent(withName: "onSongChange", body: playerState.toRNEventBody())
+            emitter.sendEvent(withName: "onSongChange", body: playerState.toObject())
+        }
+    }
+    
+    @objc private func systemVolumeDidChange(notification: Notification) {
+        if(self.hasListeners){
+            MusicPlayer.getVolume(completionHandler:  {volume in
+                self.emitter.sendEvent(withName: "systemVolumeDidChange", body: Float(volume))
+            })
+            
         }
     }
     
@@ -91,13 +110,13 @@ class MusicPlayer: RCTEventEmitter {
             updatePlayerState()
             switch (player.playbackState){
             case MPMusicPlaybackState.stopped:
-                emitter.sendEvent(withName: "onStop", body: playerState.toRNEventBody())
+                emitter.sendEvent(withName: "onStop", body: playerState.toObject())
                 break;
             case MPMusicPlaybackState.paused:
-                emitter.sendEvent(withName: "onPause", body: playerState.toRNEventBody())
+                emitter.sendEvent(withName: "onPause", body: playerState.toObject())
                 break;
             case MPMusicPlaybackState.playing:
-                emitter.sendEvent(withName: "onPlay", body: playerState.toRNEventBody())
+                emitter.sendEvent(withName: "onPlay", body: playerState.toObject())
                 break;
             //Etc.
             default:
@@ -140,51 +159,48 @@ class MusicPlayer: RCTEventEmitter {
     
     // Plays items from the current queue, resuming paused playback if possible.
     @available(iOS 10.1, *)
-    @objc(setQueue:withStartPlaying:withResolver:withRejecter:)
-    func setQueue(songIds:[String],startPlaying:Bool,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
-        let queue = MPMusicPlayerStoreQueueDescriptor(storeIDs: songIds)
-        player.setQueue(with: queue)
+    @objc(setQueue:withStartPlaying:withStartID:withResolver:withRejecter:)
+    func setQueue(songIds:[String],startPlaying:Bool,startID:String?,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
+        //        let queue = MPMusicPlayerStoreQueueDescriptor(storeIDs: songIds)
+        //        // If a startID is given, find and set the song as the start item.
+        //        if let startID = startID {
+        //            if let startItem = getMediaItemsWithIDs(songIDs: [startID]).first {
+        //                descriptor.startItem = startItem
+        //            }
+        //        }
+        //        player.setQueue(with: queue)
+        
+        let songs = getMediaItemsWithIDs(songIDs: songIds)
+        
+        let descriptor = MPMusicPlayerMediaItemQueueDescriptor(itemCollection: MPMediaItemCollection(items: songs))
+        
+        //If a startID is given, find and set the song as the start item.
+        if let startID = startID {
+            if let startItem = getMediaItemsWithIDs(songIDs: [startID]).first {
+                descriptor.startItem = startItem
+            }
+        }
+        
+        player.setQueue(with: descriptor)
+        
         if(startPlaying==true){
             player.play()
         }
         resolve(nil)
     }
     
-//    ///Set the queue with unique song ids.
-//    //   @objc(setQueue:withStartPlaying:withStartID:withResolver:withRejecter:)
-//    func setQueue(songIDs: [String], startPlaying: Bool?, startID: String?,resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
-//    if let startID = startID {
-//    if !songIDs.contains(startID) {
-//    //throw PlayifyError.runtimeError("songIDs does not contain startID!")
-//    }
-//    }
-//    let songs = getMediaItemsWithIDs(songIDs: songIDs)
-//
-//    let descriptor = MPMusicPlayerMediaItemQueueDescriptor(itemCollection: MPMediaItemCollection(items: songs))
-//
-//    //If a startID is given, find and set the song as the start item.
-//    if let startID = startID {
-//    if let startItem = getMediaItemsWithIDs(songIDs: [startID]).first {
-//    descriptor.startItem = startItem
-//    }
-//    }
-//
-//    player.setQueue(with: descriptor)
-//
-//    if let startPlaying = startPlaying {
-//    if(startPlaying){
-//    player.prepareToPlay(completionHandler: {error in
-//    if error == nil {
-//    self.play()
-//    }
-//    })
-//    }
-//    else {
-//    player.prepareToPlay()
-//    }
-//    }
-//    resolve(nil)
-//    }
+    ///Get MediaItems via a PersistentID using predicates and queries.
+    private func getMediaItemsWithIDs(songIDs: [String]) -> [MPMediaItem] {
+        var songs: [MPMediaItem] = []
+        for songID in songIDs {
+            let songFilter = MPMediaPropertyPredicate(value: songID, forProperty: MPMediaItemPropertyPersistentID, comparisonType: .equalTo)
+            let query = MPMediaQuery(filterPredicates: Set([songFilter]))
+            if let items = query.items, let first = items.first {
+                songs.append(first)
+            }
+        }
+        return songs
+    }
     
     // Pauses playback if playing.
     @objc(pause:withRejecter:)
@@ -295,19 +311,40 @@ class MusicPlayer: RCTEventEmitter {
         }
     }
     
-//    ///Set the volume to a value.
-//    @objc(setVolume:withResolver:withRejecter:)
-//    func setVolume(volume: Float,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)->Void{
-//        MPVolumeView.setVolume(volume)
-//        let vol = AVAudioSession.sharedInstance().setOu
-//        resolve(nil)
-//    }
-//    
-//    ///Get the device's current output volume.
-//    @objc(getVolume:withRejecter:)
-//    func getVolume(resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock) ->Void {
-//        resolve(AVAudioSession.sharedInstance().outputVolume)
-//    }
+    ///Set the volume to a value.
+    @objc(setVolume:withResolver:withRejecter:)
+    func setVolume(volume: Float,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)->Void{
+        MusicPlayer.setVolume(volume)
+    }
+    
+    ///Get the device's current output volume.
+    @objc(getVolume:withRejecter:)
+    func getVolume(resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock) ->Void {
+        MusicPlayer.getVolume(completionHandler:  {volume in
+            resolve(Float(volume))
+        })
+    }
+    
+    static func setVolume(_ volume: Float) {
+        let volumeView = MPVolumeView(frame: .zero)
+        
+        let slider = volumeView.subviews.first(where: { $0 is UISlider }) as? UISlider
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+            slider?.value = volume
+        }
+    }
+    
+    static func getVolume(completionHandler: @escaping (Float) -> Void) {
+        
+        let volumeView = MPVolumeView(frame: .zero)
+        
+        let slider = volumeView.subviews.first(where: { $0 is UISlider }) as? UISlider
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+            completionHandler(slider?.value ?? 0)
+        }
+    }
     
     ///Set the current time of the song.
     @objc(setPlaybackTime:withResolver:withRejecter:)
@@ -339,7 +376,7 @@ class MusicPlayer: RCTEventEmitter {
     @objc(getPlayerState:withRejecter:)
     func getPlayerState(resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock) ->Void {
         updatePlayerState()
-        resolve(playerState.toRNEventBody())
+        resolve(playerState.toObject())
     }
     
     ///Get  store front country code
@@ -412,22 +449,52 @@ class MusicPlayer: RCTEventEmitter {
         resolve(authorizationStatusToString(status: SKCloudServiceController.authorizationStatus()))
     }
     
+    ///Get all the playlists.
+    @objc(getUserPlaylists:withRejecter:)
+    func getUserPlaylists(resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock) ->Void {
+        let query = MPMediaQuery.playlists()
+        if let playlists = query.collections {
+            var userPlaylists=[Any]()
+            for playlist in playlists {
+                let userPlaylist=Playlist(items: playlist.items,name:playlist.value(forProperty:MPMediaPlaylistPropertyName) as? String,artwork:playlist.value(forProperty: MPMediaItemPropertyArtwork) as? MPMediaItemArtwork,persistentID:playlist.persistentID.description)
+                userPlaylists.append(userPlaylist.toObject())
+            }
+            resolve(userPlaylists)
+        }else{
+            resolve(nil)
+        }
+    }
+    
+    ///Get all  songs
+    @objc(getUserSongs:withRejecter:)
+    func getUserSongs(resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock) ->Void {
+        let querySongs = MPMediaQuery.songs()
+        if let songs=querySongs.items{
+            var userSongs=[Any]()
+            for song in songs {
+                userSongs.append(PlaylistItem(item: song).toObject())
+            }
+            resolve(userSongs)
+        }else{
+            resolve(nil)
+        }
+    }
     
     private func authorizationStatusToString(status:SKCloudServiceAuthorizationStatus)->String{
         switch status {
         case .denied:
             return "DENIED";
         case .restricted:
-                return "RESTRICTED"
+            return "RESTRICTED"
         case .authorized:
             return "AUTHORIZED"
         default:
-          return "NOT_DETERMINED"
+            return "NOT_DETERMINED"
         }
     }
     
     /*
-    
+     
      
      ///Get MediaItems via a PersistentID using predicates and queries.
      private func getMediaItemsWithIDs(songIDs: [String]) -> [MPMediaItem] {
@@ -455,57 +522,6 @@ class MusicPlayer: RCTEventEmitter {
      let songs = getMediaItemsWithIDs(songIDs: songIDs)
      let descriptor = MPMusicPlayerMediaItemQueueDescriptor(itemCollection: MPMediaItemCollection(items: songs))
      player.append(descriptor)
-     }
-     
-     ///Play a song with an ID.
-     func playItem(songID: String){
-     let song = getMediaItemsWithIDs(songIDs: [songID])
-     let descriptor = MPMusicPlayerMediaItemQueueDescriptor(itemCollection: MPMediaItemCollection(items: song))
-     
-     player.setQueue(with: descriptor)
-     player.prepareToPlay(completionHandler: {error in
-     if error == nil {
-     self.player.play()
-     }
-     })
-     }
-     
-     
-     
-     ///Retrieve all songs in the library.
-     func getAllSongs() -> [MPMediaItem] {
-     let songsQuery = MPMediaQuery.songs()
-     let songs = songsQuery.items ?? []
-     return songs
-     }
-     
-     
-     
-     ///Get all the playlists.
-     func getPlaylists() -> [MPMediaItemCollection]? {
-     let query = MPMediaQuery.playlists()
-     if let playlists = query.collections {
-     return playlists
-     }
-     return nil
-     }
-     
-     
-     
-     ///Increment the volume by an amount. The volume can be incremented with negative number in order to decrease it..
-     func incrementVolume(amount: Float){
-     getVolume(completionHandler: {volume in
-     guard volume + amount > 0 else {
-     MPVolumeView.setVolume(0)
-     return
-     }
-     guard volume + amount < 1 else {
-     MPVolumeView.setVolume(1)
-     return
-     }
-     
-     MPVolumeView.setVolume(volume + amount)
-     })
      }
      */
 }

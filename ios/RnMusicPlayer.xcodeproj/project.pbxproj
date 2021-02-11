@@ -23,6 +23,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		033AB64B25D54B6F00F7F852 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
+		033AB76E25D554E200F7F852 /* PlaylistItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistItem.swift; sourceTree = "<group>"; };
 		03CEBFB625D034B9002300BC /* PlayerState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerState.swift; sourceTree = "<group>"; };
 		134814201AA4EA6300B7C361 /* libRnMusicPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRnMusicPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5891CC2AC0600A0062D /* RnMusicPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RnMusicPlayer.m; sourceTree = "<group>"; };
@@ -52,6 +54,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				033AB76E25D554E200F7F852 /* PlaylistItem.swift */,
+				033AB64B25D54B6F00F7F852 /* Playlist.swift */,
 				03CEBFB625D034B9002300BC /* PlayerState.swift */,
 				F4FF95D6245B92E800C19C63 /* RnMusicPlayer.swift */,
 				B3E7B5891CC2AC0600A0062D /* RnMusicPlayer.m */,

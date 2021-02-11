@@ -77,7 +77,24 @@ The following table shows the platform support for various functionality within 
 | `requestUserToken`         | ✅  |   ❌    |
 | `requestAuthorization`     | ✅  |   ❌    |
 | `getAuthorizationStatus`   | ✅  |   ❌    |
+| `getUserPlaylists`         | ✅  |   ❌    |
+| `getUserSongs`             | ✅  |   ❌    |
+| `getVolume`                | ✅  |   ❌    |
+| `setVolume`                | ✅  |   ❌    |
 
+### Event listeners
+
+You can listen to MusicPlayerEvents events.
+
+| MusicPlayerEvents                       |
+| ---------------------------------------- |
+| **`onPlay`**                 |
+| **`onPause`**               |
+| **`onNext`**              |
+| **`onStop`**             |
+| **`onPrevious`** |
+| **`onSongChange`**                      |
+| **`systemVolumeDidChange`**            |
 ### Apple Music API Requests
 
 The module also exports **AppleMusicRequests**, which contains predefined requests to fetch data from [Apple Music API](https://developer.apple.com/documentation/applemusicapi/).

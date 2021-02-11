@@ -17,6 +17,24 @@ export interface IApiRequest {
   };
 }
 
+export interface UserPlaylist {
+  persistentID: string;
+  name: string;
+  artwork: string | null;
+  items: UserPlaylistItem[];
+}
+
+export interface UserPlaylistItem {
+  persistentID: string;
+  albumPersistentID: string;
+  albumTitle: string;
+  playbackDuration: 192.112;
+  artist: string;
+  title: string;
+  albumArtist: string;
+  artwork: string | null;
+}
+
 export type AuthorizationStatus = 'NOT_DETERMINED' | 'DENIED' | 'RESTRICTED' | 'AUTHORIZED';
 
 export interface IMusicPlayer {
@@ -32,7 +50,7 @@ export interface IMusicPlayer {
   next(): Promise<void>;
   play(): Promise<void>;
   playSongById(songId: string): Promise<void>;
-  setQueue(songIds: string[], startPlaying: boolean): Promise<void>;
+  setQueue(songIds: string[], startPlaying?: boolean, startID?: string): Promise<void>;
   pause(): Promise<void>;
   prepareToPlay(): Promise<void>;
   previous(): Promise<void>;
@@ -41,11 +59,13 @@ export interface IMusicPlayer {
   setShuffleMode(shuffleMode: ShuffleMode): Promise<void>;
   skipToBeginning(): Promise<void>;
   stop(): Promise<void>;
-  // setVolume(volume: number): Promise<void>;
-  // getVolume(): Promise<number>; // returns seconds
   checkIfPremiumApple(): Promise<boolean>;
   getStoreFrontCountryCode(): Promise<string>;
   requestUserToken(developerToken: string): Promise<string>;
   requestAuthorization(): Promise<AuthorizationStatus>;
   getAuthorizationStatus(): Promise<AuthorizationStatus>;
+  getUserPlaylists(): Promise<UserPlaylist[] | null>;
+  getUserSongs(): Promise<UserPlaylistItem[] | null>;
+  getVolume(): Promise<number>;
+  setVolume(volume: number): Promise<void>;
 }

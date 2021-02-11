@@ -1,46 +1,22 @@
 import React from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, ListRenderItem } from 'react-native';
 import styles from './playlist.styles';
-import type { Album, Song } from '../../models/interfaces';
-import SongItem from '../Song';
-import AlbumItem from '../Album';
 
-interface PlaylistProps {
-  data: ReadonlyArray<Song | Album>;
-  onItemPress: (itemId: string) => void;
+export interface PlaylistProps {
+  data: ReadonlyArray<any>;
+  renderItem: ListRenderItem<any> | null | undefined;
+  keyExtractor: (item: any, index: number) => string;
 }
 
-const Playlist: React.FC<PlaylistProps> = ({ data, onItemPress }) => {
+const Playlist: React.FC<PlaylistProps> = ({ data, renderItem, keyExtractor }) => {
   return (
     <FlatList
+      showsHorizontalScrollIndicator={false}
       data={data}
       horizontal={true}
       style={styles.flatListStyle}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => {
-        if ('songName' in item) {
-          let songItem = item as Song;
-          return (
-            <SongItem
-              onPress={() => onItemPress(songItem.id)}
-              imageUrl={songItem.artwork}
-              album={songItem.albumName}
-              artist={songItem.artistName}
-              song={songItem.songName}
-            />
-          );
-        } else {
-          let albumItem = item as Album;
-          return (
-            <AlbumItem
-              onPress={() => onItemPress(albumItem.id)}
-              imageUrl={albumItem.artwork}
-              album={albumItem.albumName}
-              artist={albumItem.artistName}
-            />
-          );
-        }
-      }}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
     />
   );
 };

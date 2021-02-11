@@ -1,5 +1,13 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import type { IMusicPlayer, IPlayerState, RepeatMode, ShuffleMode, AuthorizationStatus } from './interfaces';
+import type {
+  IMusicPlayer,
+  IPlayerState,
+  RepeatMode,
+  ShuffleMode,
+  AuthorizationStatus,
+  UserPlaylist,
+  UserPlaylistItem,
+} from './interfaces';
 import AppleMusicRequests from './api';
 const { MusicPlayer } = NativeModules;
 
@@ -206,9 +214,41 @@ function playSongById(songId: string): Promise<void> {
   }
 }
 
-function setQueue(songIds: string[], startPlaying = false): Promise<void> {
+function setQueue(songIds: string[], startPlaying = false, startID?: string): Promise<void> {
   if (isIOS) {
-    return Player.setQueue(songIds, startPlaying);
+    return Player.setQueue(songIds, startPlaying, startID);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getUserPlaylists(): Promise<UserPlaylist[] | null> {
+  if (isIOS) {
+    return Player.getUserPlaylists();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getUserSongs(): Promise<UserPlaylistItem[] | null> {
+  if (isIOS) {
+    return Player.getUserSongs();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function getVolume(): Promise<number> {
+  if (isIOS) {
+    return Player.getVolume();
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function setVolume(volume: number): Promise<void> {
+  if (isIOS) {
+    return Player.setVolume(volume);
   } else {
     throw new Error('Not implemented');
   }
@@ -216,7 +256,7 @@ function setQueue(songIds: string[], startPlaying = false): Promise<void> {
 
 const MusicPlayerEvents = new NativeEventEmitter(MusicPlayer);
 export { AppleMusicRequests, MusicPlayerEvents };
-export type { IPlayerState, RepeatMode, ShuffleMode, IMusicPlayer, AuthorizationStatus };
+export type { IPlayerState, RepeatMode, ShuffleMode, IMusicPlayer, AuthorizationStatus, UserPlaylist };
 export default {
   currentSongTitle,
   getCurrentPlaybackRate,
@@ -244,4 +284,8 @@ export default {
   getAuthorizationStatus,
   playSongById,
   setQueue,
+  getUserPlaylists,
+  getUserSongs,
+  getVolume,
+  setVolume,
 };

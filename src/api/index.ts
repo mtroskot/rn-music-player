@@ -41,8 +41,8 @@ const searchRequest = (term: string, JWT_KEY: string, storefront = 'us'): IApiRe
   options: { method: 'GET', headers: { Authorization: `Bearer ${JWT_KEY}` } },
 });
 
-const getUserPlaylistsRequest = (JWT_KEY: string, USER_TOKEN: string, storefront = 'us'): IApiRequest => ({
-  url: `${USER_PLAYLISTS.replace('%STOREFRONT%', storefront)}`,
+const getUserPlaylistsRequest = (JWT_KEY: string, USER_TOKEN: string): IApiRequest => ({
+  url: `${USER_PLAYLISTS}`,
   options: { method: 'GET', headers: { 'Authorization': `Bearer ${JWT_KEY}`, 'Music-User-Token': USER_TOKEN } },
 });
 
