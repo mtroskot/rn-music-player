@@ -11,17 +11,21 @@ interface VolumeSliderProps {
 const VolumeSlider: React.FC<VolumeSliderProps> = ({ volume, onSlide }) => {
   return (
     <View style={styles.container}>
-      <Slider
-        style={styles.slider}
-        minimumValue={0}
-        maximumValue={1}
-        value={volume}
-        minimumTrackTintColor="#babcbf"
-        maximumTrackTintColor="#babcbf"
-        step={0.1}
-        onValueChange={onSlide}
-      />
-      <Text>{Math.round(volume * 100)}%</Text>
+      <View style={styles.sliderWrapper}>
+        <Slider
+          style={styles.slider}
+          minimumValue={0}
+          maximumValue={1}
+          value={volume}
+          minimumTrackTintColor="#babcbf"
+          maximumTrackTintColor="#babcbf"
+          step={0.05}
+          onValueChange={onSlide}
+        />
+      </View>
+      <View style={styles.volumeWrapper}>
+        <Text>{Math.round(volume * 100)}%</Text>
+      </View>
     </View>
   );
 };

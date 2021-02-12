@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { ImageSourcePropType, ListRenderItem, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import MusicPlayer, { AppleMusicRequests, IPlayerState, MusicPlayerEvents, RepeatMode, ShuffleMode, UserPlaylist } from 'rn-music-player';
 import ApiService from './api';
@@ -11,6 +11,7 @@ import PlaylistSection from './components/PlaylistSection';
 import VolumeSlider from './components/VolumeSlider';
 import type { AuthorizationStatus, UserPlaylistItem } from 'src/interfaces';
 import type { Album, Song, SongResponse, TopChartsResponse } from './models/interfaces';
+import { throttle, secondsToPlayTimeString, convertArtworkUrlToImageUrl } from './utils/funcUtils';
 
 const coverSize = 200;
 const DEVELOPER_JWT_TOKEN = 'YOUR_OWN_APPLE_DEVELOPER_TOKEN';
@@ -50,7 +51,7 @@ export default function App() {
   useEffect(() => {
     let handler: NodeJS.Timeout | null = null;
     if (isPlaying) {
-      handler = setInterval(getPlaybackTime, 1000);
+      handler = setInterval(getPlaybackTime, 500);
     }
     return () => {
       clearInterval(handler as NodeJS.Timeout);
@@ -153,7 +154,7 @@ export default function App() {
         id: song.id,
         albumName: song.attributes.albumName,
         artistName: song.attributes.artistName,
-        artwork: convertArtworkUrlToImageUrl(song.attributes.artwork.url),
+        artwork: convertArtworkUrlToImageUrl(song.attributes.artwork.url, coverSize),
         songUrl: song.attributes.url,
         songName: song.attributes.name,
       }));
@@ -162,7 +163,7 @@ export default function App() {
         id: album.id,
         albumName: album.attributes.name,
         artistName: album.attributes.artistName,
-        artwork: convertArtworkUrlToImageUrl(album.attributes.artwork.url),
+        artwork: convertArtworkUrlToImageUrl(album.attributes.artwork.url, coverSize),
         songUrl: album.attributes.url,
       }));
       setTopAlbums(albums);
@@ -171,16 +172,12 @@ export default function App() {
     }
   }
 
-  function convertArtworkUrlToImageUrl(artworkUrl: string) {
-    return artworkUrl.replace('{w}x{h}', `${coverSize}x${coverSize}`);
-  }
-
   async function getSongById(songId: string) {
     try {
       const response = await ApiService.callApi<SongResponse>(
         AppleMusicRequests.fetchSongByIdRequest(songId, DEVELOPER_JWT_TOKEN, STORE_FRONT)
       );
-      setArtwork({ uri: convertArtworkUrlToImageUrl(response.data.data[0].attributes.artwork.url) });
+      setArtwork({ uri: convertArtworkUrlToImageUrl(response.data.data[0].attributes.artwork.url, coverSize) });
     } catch (error) {
       setArtwork(null);
     } finally {
@@ -263,6 +260,7 @@ export default function App() {
     setVolume(value);
     await MusicPlayer.setVolume(value);
   }, []);
+  const onVolumeSlideThrottled = useMemo(() => throttle(onVolumeSlide, 150), [onVolumeSlide]);
 
   async function playSongById(songId: string) {
     await MusicPlayer.playSongById(songId);
@@ -305,9 +303,9 @@ export default function App() {
         <SongItem
           onPress={() =>
             MusicPlayer.setQueue(
-              userSongs.map((_, index) => index.toString()),
+              userSongs.map((song) => song.persistentID),
               true,
-              index.toString()
+              userSongs[index].persistentID
             )
           }
           song={item.title}
@@ -333,7 +331,7 @@ export default function App() {
         <PlayerControls
           {...{ repeatMode, shuffleMode, isPlaying, onShufflePress, onRepeatPress, onTogglePlayPress, onNextPress, onPreviousPress }}
         />
-        <VolumeSlider volume={volume} onSlide={onVolumeSlide} />
+        <VolumeSlider volume={volume} onSlide={onVolumeSlideThrottled} />
         <PlaylistSection data={topSongs} renderItem={renderSongItem} keyExtractor={(item: Song) => item.id} title={'Top Songs'} />
         <PlaylistSection data={topAlbums} renderItem={renderAlbumItem} keyExtractor={(item: Album) => item.id} title={'Top Albums'} />
         <PlaylistSection
@@ -369,17 +367,3 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
-
-function secondsToPlayTimeString(seconds: number | null) {
-  if (typeof seconds !== 'number') {
-    return '0:00';
-  }
-  const flooredSeconds = Math.floor(seconds);
-  const minutes = Math.floor(flooredSeconds / 60);
-  const playTimeSeconds = flooredSeconds % 60 === 0 ? 0 : flooredSeconds - minutes * 60;
-  return `${minutes}:${convertShortTimeToLongTime(playTimeSeconds)}`;
-}
-
-function convertShortTimeToLongTime(time: number): string {
-  return time < 10 ? `0${time}` : `${time}`;
-}

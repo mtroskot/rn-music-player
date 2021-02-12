@@ -101,7 +101,6 @@ class MusicPlayer: RCTEventEmitter {
             MusicPlayer.getVolume(completionHandler:  {volume in
                 self.emitter.sendEvent(withName: "systemVolumeDidChange", body: Float(volume))
             })
-            
         }
     }
     
@@ -161,14 +160,12 @@ class MusicPlayer: RCTEventEmitter {
     @available(iOS 10.1, *)
     @objc(setQueue:withStartPlaying:withStartID:withResolver:withRejecter:)
     func setQueue(songIds:[String],startPlaying:Bool,startID:String?,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
-        //        let queue = MPMusicPlayerStoreQueueDescriptor(storeIDs: songIds)
-        //        // If a startID is given, find and set the song as the start item.
-        //        if let startID = startID {
-        //            if let startItem = getMediaItemsWithIDs(songIDs: [startID]).first {
-        //                descriptor.startItem = startItem
-        //            }
-        //        }
-        //        player.setQueue(with: queue)
+        if let startID = startID {
+            if !songIds.contains(startID) {
+                reject("setQueue","songIds does not contain startID!",RnMusicPlayerError.runtimeError("songIDs does not contain startID!"+startID))
+                return;
+            }
+        }
         
         let songs = getMediaItemsWithIDs(songIDs: songIds)
         
@@ -180,7 +177,6 @@ class MusicPlayer: RCTEventEmitter {
                 descriptor.startItem = startItem
             }
         }
-        
         player.setQueue(with: descriptor)
         
         if(startPlaying==true){
@@ -494,22 +490,6 @@ class MusicPlayer: RCTEventEmitter {
     }
     
     /*
-     
-     
-     ///Get MediaItems via a PersistentID using predicates and queries.
-     private func getMediaItemsWithIDs(songIDs: [String]) -> [MPMediaItem] {
-     var songs: [MPMediaItem] = []
-     for songID in songIDs {
-     let songFilter = MPMediaPropertyPredicate(value: songID, forProperty: MPMediaItemPropertyPersistentID, comparisonType: .equalTo)
-     let query = MPMediaQuery(filterPredicates: Set([songFilter]))
-     if let items = query.items, let first = items.first {
-     songs.append(first)
-     }
-     }
-     return songs
-     }
-     
-     
      ///Prepend songs to the current queue.
      func prepend(songIDs: [String]){
      let songs = getMediaItemsWithIDs(songIDs: songIDs)
