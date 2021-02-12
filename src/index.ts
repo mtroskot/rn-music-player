@@ -206,17 +206,33 @@ function getAuthorizationStatus(): Promise<AuthorizationStatus> {
   }
 }
 
-function playSongById(songId: string): Promise<void> {
+function playAppleMusicSongById(songId: string): Promise<void> {
   if (isIOS) {
-    return Player.playSongById(songId);
+    return Player.playAppleMusicSongById(songId);
   } else {
     throw new Error('Not implemented');
   }
 }
 
-function setQueue(songIds: string[], startPlaying = false, startID?: string): Promise<void> {
+function playLocalSongById(songId: string): Promise<void> {
   if (isIOS) {
-    return Player.setQueue(songIds, startPlaying, startID);
+    return Player.playLocalSongById(songId);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function setAppleMusicQueue(songIds: string[], startPlaying = false, startID?: string): Promise<void> {
+  if (isIOS) {
+    return Player.setAppleMusicQueue(songIds, startPlaying, startID);
+  } else {
+    throw new Error('Not implemented');
+  }
+}
+
+function setLocalMusicQueue(songIds: string[], startPlaying = false, startID?: string): Promise<void> {
+  if (isIOS) {
+    return Player.setLocalMusicQueue(songIds, startPlaying, startID);
   } else {
     throw new Error('Not implemented');
   }
@@ -282,8 +298,10 @@ export default {
   requestUserToken,
   requestAuthorization,
   getAuthorizationStatus,
-  playSongById,
-  setQueue,
+  playAppleMusicSongById,
+  playLocalSongById,
+  setAppleMusicQueue,
+  setLocalMusicQueue,
   getUserPlaylists,
   getUserSongs,
   getVolume,

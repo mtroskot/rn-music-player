@@ -61,8 +61,10 @@ The following table shows the platform support for various functionality within 
 | `isPreparedToPlay`         | ✅  |   ❌    |
 | `next`                     | ✅  |   ❌    |
 | `play`                     | ✅  |   ❌    |
-| `playSongById`             | ✅  |   ❌    |
-| `setQueue`                 | ✅  |   ❌    |
+| `playAppleMusicSongById`   | ✅  |   ❌    |
+| `playLocalSongById`        | ✅  |   ❌    |
+| `setAppleMusicQueue`       | ✅  |   ❌    |
+| `setLocalMusicQueue`       | ✅  |   ❌    |
 | `pause`                    | ✅  |   ❌    |
 | `prepareToPlay`            | ✅  |   ❌    |
 | `previous`                 | ✅  |   ❌    |

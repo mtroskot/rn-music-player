@@ -14,10 +14,16 @@ RCT_EXTERN_METHOD(isPreparedToPlay:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(play:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(playSongById:(NSString)songId withResolver:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(playAppleMusicSongById:(NSString)songId withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(setQueue:(NSArray)songIds withStartPlaying:(BOOL)startPlaying withStartID:(NSString)startID withResolver:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(playLocalSongById:(NSString)songId withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setAppleMusicQueue:(NSArray)songIds withStartPlaying:(BOOL)startPlaying withStartID:(NSString)startID withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setLocalMusicQueue:(NSArray)songIds withStartPlaying:(BOOL)startPlaying withStartID:(NSString)startID withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(pause:(RCTPromiseResolveBlock)resolve

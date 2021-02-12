@@ -49,8 +49,10 @@ export interface IMusicPlayer {
   isPreparedToPlay(): Promise<boolean>;
   next(): Promise<void>;
   play(): Promise<void>;
-  playSongById(songId: string): Promise<void>;
-  setQueue(songIds: string[], startPlaying?: boolean, startID?: string): Promise<void>;
+  playAppleMusicSongById(songId: string): Promise<void>;
+  playLocalSongById(songId: string): Promise<void>;
+  setLocalMusicQueue(songIds: string[], startPlaying?: boolean, startID?: string): Promise<void>;
+  setAppleMusicQueue(songIds: string[], startPlaying?: boolean, startID?: string): Promise<void>;
   pause(): Promise<void>;
   prepareToPlay(): Promise<void>;
   previous(): Promise<void>;

@@ -147,8 +147,8 @@ class MusicPlayer: RCTEventEmitter {
     
     // Plays song in current queue or adds it to the queue
     @available(iOS 10.1, *)
-    @objc(playSongById:withResolver:withRejecter:)
-    func playSongById(songId:String,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
+    @objc(playAppleMusicSongById:withResolver:withRejecter:)
+    func playAppleMusicSongById(songId:String,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
         let storeIds: [String] = [songId];
         let queue = MPMusicPlayerStoreQueueDescriptor(storeIDs: storeIds)
         player.setQueue(with: queue)
@@ -156,10 +156,21 @@ class MusicPlayer: RCTEventEmitter {
         resolve(nil)
     }
     
+    // Plays song in current queue or adds it to the queue
+    @available(iOS 10.1, *)
+    @objc(playLocalSongById:withResolver:withRejecter:)
+    func playLocalSongById(songId:String,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
+        let song = getMediaItemsWithIDs(songIDs: [songId])
+        let descriptor = MPMusicPlayerMediaItemQueueDescriptor(itemCollection: MPMediaItemCollection(items: song))
+        player.setQueue(with: descriptor)
+        player.play()
+        resolve(nil)
+    }
+    
     // Plays items from the current queue, resuming paused playback if possible.
     @available(iOS 10.1, *)
-    @objc(setQueue:withStartPlaying:withStartID:withResolver:withRejecter:)
-    func setQueue(songIds:[String],startPlaying:Bool,startID:String?,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
+    @objc(setLocalMusicQueue:withStartPlaying:withStartID:withResolver:withRejecter:)
+    func setLocalMusicQueue(songIds:[String],startPlaying:Bool,startID:String?,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
         if let startID = startID {
             if !songIds.contains(startID) {
                 reject("setQueue","songIds does not contain startID!",RnMusicPlayerError.runtimeError("songIDs does not contain startID!"+startID))
@@ -184,6 +195,21 @@ class MusicPlayer: RCTEventEmitter {
         }
         resolve(nil)
     }
+    
+    
+    // Plays items from the current queue, resuming paused playback if possible.
+    @available(iOS 10.1, *)
+    @objc(setAppleMusicQueue:withStartPlaying:withStartID:withResolver:withRejecter:)
+    func setAppleMusicQueue(songIds:[String],startPlaying:Bool,startID:String?,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
+        let queue = MPMusicPlayerStoreQueueDescriptor(storeIDs: songIds)
+        player.setQueue(with: queue)
+        
+        if(startPlaying==true){
+            player.play()
+        }
+        resolve(nil)
+    }
+ 
     
     ///Get MediaItems via a PersistentID using predicates and queries.
     private func getMediaItemsWithIDs(songIDs: [String]) -> [MPMediaItem] {
