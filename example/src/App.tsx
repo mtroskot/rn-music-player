@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { Button, ImageSourcePropType, ListRenderItem, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ImageSourcePropType, ListRenderItem, SafeAreaView, ScrollView, StyleSheet } from 'react-native';
 import MusicPlayer, { AppleMusicRequests, IPlayerState, MusicPlayerEvents, RepeatMode, ShuffleMode, UserPlaylist } from 'rn-music-player';
 import ApiService from './api';
 import PlayerControls from './components/PlayerControls';
@@ -11,7 +11,7 @@ import PlaylistSection from './components/PlaylistSection';
 import VolumeSlider from './components/VolumeSlider';
 import type { AuthorizationStatus, UserPlaylistItem } from 'src/interfaces';
 import type { Album, Song, SongResponse, TopChartsResponse } from './models/interfaces';
-import { throttle, secondsToPlayTimeString, convertArtworkUrlToImageUrl } from './utils/funcUtils';
+import { convertArtworkUrlToImageUrl, secondsToPlayTimeString, throttle } from './utils/funcUtils';
 
 const coverSize = 200;
 const DEVELOPER_JWT_TOKEN = 'YOUR_OWN_APPLE_DEVELOPER_TOKEN';
@@ -280,7 +280,14 @@ export default function App() {
   const renderAppleMusicSongItem: ListRenderItem<Song> = useCallback(({ item }) => {
     return (
       <SongItem
-        onPress={() => playAppleMusicSongBy(item.id)}
+        onPress={() => {
+          playAppleMusicSongBy(item.id);
+          // MusicPlayer.setAppleMusicQueue(
+          //   topSongs.map((song) => song.id),
+          //   true,
+          //   item.id
+          // );
+        }}
         imageUrl={item.artwork}
         album={item.albumName}
         artist={item.artistName}
@@ -298,16 +305,16 @@ export default function App() {
   }, []);
 
   const renderUserSongs: ListRenderItem<UserPlaylistItem> = useCallback(
-    ({ item, index }) => {
+    ({ item }) => {
       return (
         <SongItem
-          onPress={
-            () => MusicPlayer.playLocalSongById(userSongs[index].persistentID)
-            // MusicPlayer.setLocalMusicQueue(
-            //   userSongs.map((song) => song.persistentID),
-            //   true,
-            //   userSongs[index].persistentID
-            // )
+          onPress={() =>
+            // MusicPlayer.playLocalSongById(item.persistentID)
+            MusicPlayer.setLocalMusicQueue(
+              userSongs.map((song) => song.persistentID),
+              true,
+              item.persistentID
+            )
           }
           song={item.title}
           artist={item.artist}
@@ -333,7 +340,6 @@ export default function App() {
           {...{ repeatMode, shuffleMode, isPlaying, onShufflePress, onRepeatPress, onTogglePlayPress, onNextPress, onPreviousPress }}
         />
         <VolumeSlider volume={volume} onSlide={onVolumeSlideThrottled} />
-        <Button title={'play this shit'} onPress={() => MusicPlayer.setAppleMusicQueue(['1369109322'], true)} />
         <PlaylistSection data={topSongs} renderItem={renderAppleMusicSongItem} keyExtractor={(item: Song) => item.id} title={'Top Songs'} />
         <PlaylistSection data={topAlbums} renderItem={renderAlbumItem} keyExtractor={(item: Album) => item.id} title={'Top Albums'} />
         <PlaylistSection

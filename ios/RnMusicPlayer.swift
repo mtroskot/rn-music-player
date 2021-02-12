@@ -202,6 +202,9 @@ class MusicPlayer: RCTEventEmitter {
     @objc(setAppleMusicQueue:withStartPlaying:withStartID:withResolver:withRejecter:)
     func setAppleMusicQueue(songIds:[String],startPlaying:Bool,startID:String?,resolve:@escaping RCTPromiseResolveBlock,reject:@escaping RCTPromiseRejectBlock)-> Void{
         let queue = MPMusicPlayerStoreQueueDescriptor(storeIDs: songIds)
+        if let startID = startID {
+            queue.startItemID=startID
+        }
         player.setQueue(with: queue)
         
         if(startPlaying==true){
