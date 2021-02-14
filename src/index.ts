@@ -13,53 +13,31 @@ const { MusicPlayer } = NativeModules;
 
 const Player = MusicPlayer as IMusicPlayer;
 const isIOS = Platform.OS === 'ios';
+const isAndroid = Platform.OS === 'android';
 
 function currentSongTitle(): Promise<string> {
-  if (isIOS) {
-    return Player.currentSongTitle();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.currentSongTitle();
 }
 
 function getCurrentPlaybackRate(): Promise<number> {
-  if (isIOS) {
-    return Player.getCurrentPlaybackRate();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.getCurrentPlaybackRate();
 }
 
 function getPlaybackDuration(): Promise<number> {
-  if (isIOS) {
-    return Player.getPlaybackDuration();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.getPlaybackDuration();
 }
 
-function getPlaybackTime(): Promise<number> {
-  if (isIOS) {
-    return Player.getPlaybackTime();
-  } else {
-    throw new Error('Not implemented');
-  }
+async function getPlaybackTime(): Promise<number> {
+  return Player.getPlaybackTime();
 }
 
+// TODO Android not ready
 function getPlayerState(): Promise<IPlayerState> {
-  if (isIOS) {
-    return Player.getPlayerState();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.getPlayerState();
 }
 
-function getRepeatMode(): Promise<RepeatMode> {
-  if (isIOS) {
-    return Player.getRepeatMode();
-  } else {
-    throw new Error('Not implemented');
-  }
+async function getRepeatMode(): Promise<RepeatMode> {
+  return Player.getRepeatMode();
 }
 
 function getShuffleMode(): Promise<ShuffleMode> {
@@ -71,11 +49,7 @@ function getShuffleMode(): Promise<ShuffleMode> {
 }
 
 function isPlaying(): Promise<boolean> {
-  if (isIOS) {
-    return Player.isPlaying();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.isPlaying();
 }
 
 function isPreparedToPlay(): Promise<boolean> {
@@ -87,59 +61,35 @@ function isPreparedToPlay(): Promise<boolean> {
 }
 
 function next(): Promise<void> {
-  if (isIOS) {
-    return Player.next();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.next();
 }
 
 function pause(): Promise<void> {
-  if (isIOS) {
-    return Player.pause();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.pause();
 }
 
 function play(): Promise<void> {
-  if (isIOS) {
-    return Player.play();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.play();
 }
 
 function prepareToPlay(): Promise<void> {
   if (isIOS) {
     return Player.prepareToPlay();
   } else {
-    throw new Error('Not implemented');
+    throw new Error('iOS only');
   }
 }
 
 function previous(): Promise<void> {
-  if (isIOS) {
-    return Player.previous();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.previous();
 }
 
 function setPlaybackTime(timeInSeconds: number): Promise<RepeatMode> {
-  if (isIOS) {
-    return Player.setPlaybackTime(timeInSeconds);
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.setPlaybackTime(timeInSeconds);
 }
 
 function setRepeatMode(repeatMode: RepeatMode): Promise<void> {
-  if (isIOS) {
-    return Player.setRepeatMode(repeatMode);
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.setRepeatMode(repeatMode);
 }
 
 function setShuffleMode(shuffleMode: ShuffleMode): Promise<void> {
@@ -151,19 +101,11 @@ function setShuffleMode(shuffleMode: ShuffleMode): Promise<void> {
 }
 
 function skipToBeginning(): Promise<void> {
-  if (isIOS) {
-    return Player.skipToBeginning();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.skipToBeginning();
 }
 
 function stop(): Promise<void> {
-  if (isIOS) {
-    return Player.stop();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.stop();
 }
 
 function checkIfPremiumApple(): Promise<boolean> {
@@ -246,27 +188,24 @@ function getUserPlaylists(): Promise<UserPlaylist[] | null> {
   }
 }
 
+// TODO update type
 function getUserSongs(): Promise<UserPlaylistItem[] | null> {
-  if (isIOS) {
-    return Player.getUserSongs();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.getUserSongs();
 }
 
 function getVolume(): Promise<number> {
-  if (isIOS) {
-    return Player.getVolume();
-  } else {
-    throw new Error('Not implemented');
-  }
+  return Player.getVolume();
 }
 
 function setVolume(volume: number): Promise<void> {
-  if (isIOS) {
-    return Player.setVolume(volume);
+  return Player.setVolume(volume);
+}
+
+function initializeMusicPlayerAndroid(): Promise<void> {
+  if (isAndroid) {
+    return Player.initializeMusicPlayer();
   } else {
-    throw new Error('Not implemented');
+    throw new Error('Android only');
   }
 }
 
@@ -306,4 +245,5 @@ export default {
   getUserSongs,
   getVolume,
   setVolume,
+  initializeMusicPlayerAndroid,
 };

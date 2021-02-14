@@ -17,7 +17,7 @@ const coverSize = 200;
 const DEVELOPER_JWT_TOKEN = 'YOUR_OWN_APPLE_DEVELOPER_TOKEN';
 let USER_TOKEN = '';
 let STORE_FRONT = 'us';
-export default function App() {
+export default function AppIOS() {
   const [currentSongTitle, setCurrentSongTitle] = useState<null | string>(null);
   const [author, setAuthor] = useState<null | string>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -51,17 +51,12 @@ export default function App() {
   useEffect(() => {
     let handler: NodeJS.Timeout | null = null;
     if (isPlaying) {
+      getPlaybackDuration();
       handler = setInterval(getPlaybackTime, 500);
     }
     return () => {
       clearInterval(handler as NodeJS.Timeout);
     };
-  }, [isPlaying]);
-
-  useEffect(() => {
-    if (isPlaying) {
-      getPlaybackDuration();
-    }
   }, [isPlaying]);
 
   function addListeners() {
@@ -102,6 +97,7 @@ export default function App() {
     const volume = await MusicPlayer.getVolume();
     setVolume(volume);
   }
+
   async function getUserPlaylists() {
     const result = await MusicPlayer.getUserPlaylists();
     if (result) {
@@ -260,6 +256,7 @@ export default function App() {
     setVolume(value);
     await MusicPlayer.setVolume(value);
   }, []);
+
   const onVolumeSlideThrottled = useMemo(() => throttle(onVolumeSlide, 150), [onVolumeSlide]);
 
   async function playAppleMusicSongBy(songId: string) {
