@@ -70,4 +70,5 @@ export interface IMusicPlayer {
   getUserSongs(): Promise<UserPlaylistItem[] | null>;
   getVolume(): Promise<number>;
   setVolume(volume: number): Promise<void>;
+  initializeMusicPlayer(): Promise<void>;
 }

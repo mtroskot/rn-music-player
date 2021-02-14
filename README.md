@@ -3,7 +3,6 @@
 Music player for playing music from iOS's & Android Music Library and Premium Apple Music.
 More features are yet to come.
 
-
 ## Installation
 
 ```sh
@@ -30,14 +29,11 @@ Min supported iOS version 10.3
 
 ### Android
 
-implementation coming soon...
-
 Add to your AndroidManifest
 
 ```
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 ```
-
 
 ## Supported Features
 
@@ -48,55 +44,56 @@ An [Example](./example) project was developed to exercise and test all functiona
 
 The following table shows the platform support for various functionality within this library.
 
-| Feature                    | iOS | Android |
-| :------------------------- | :-: | :-----: |
-| `currentSongTitle`         | ✅  |   ❌    |
-| `getCurrentPlaybackRate`   | ✅  |   ❌    |
-| `getPlaybackDuration`      | ✅  |   ❌    |
-| `getPlaybackTime`          | ✅  |   ❌    |
-| `getPlayerState`           | ✅  |   ❌    |
-| `getRepeatMode`            | ✅  |   ❌    |
-| `getShuffleMode`           | ✅  |   ❌    |
-| `isPlaying`                | ✅  |   ❌    |
-| `isPreparedToPlay`         | ✅  |   ❌    |
-| `next`                     | ✅  |   ❌    |
-| `play`                     | ✅  |   ❌    |
-| `playAppleMusicSongById`   | ✅  |   ❌    |
-| `playLocalSongById`        | ✅  |   ❌    |
-| `setAppleMusicQueue`       | ✅  |   ❌    |
-| `setLocalMusicQueue`       | ✅  |   ❌    |
-| `pause`                    | ✅  |   ❌    |
-| `prepareToPlay`            | ✅  |   ❌    |
-| `previous`                 | ✅  |   ❌    |
-| `setRepeatMode`            | ✅  |   ❌    |
-| `setPlaybackTime`          | ✅  |   ❌    |
-| `setRepeatMode`            | ✅  |   ❌    |
-| `setShuffleMode`           | ✅  |   ❌    |
-| `skipToBeginning`          | ✅  |   ❌    |
-| `stop`                     | ✅  |   ❌    |
-| `checkIfPremiumApple`      | ✅  |   ❌    |
-| `getStoreFrontCountryCode` | ✅  |   ❌    |
-| `requestUserToken`         | ✅  |   ❌    |
-| `requestAuthorization`     | ✅  |   ❌    |
-| `getAuthorizationStatus`   | ✅  |   ❌    |
-| `getUserPlaylists`         | ✅  |   ❌    |
-| `getUserSongs`             | ✅  |   ❌    |
-| `getVolume`                | ✅  |   ❌    |
-| `setVolume`                | ✅  |   ❌    |
+| Feature                        | iOS | Android |
+| :----------------------------- | :-: | :-----: |
+| `currentSongTitle`             | ✅  |   ✅    |
+| `getCurrentPlaybackRate`       | ✅  |   ✅    |
+| `getPlaybackDuration`          | ✅  |   ✅    |
+| `getPlaybackTime`              | ✅  |   ✅    |
+| `getPlayerState`               | ✅  |   ❌    |
+| `getRepeatMode`                | ✅  |   ✅    |
+| `getShuffleMode`               | ✅  |   ❌    |
+| `isPlaying`                    | ✅  |   ✅    |
+| `isPreparedToPlay`             | ✅  |   ❌    |
+| `next`                         | ✅  |   ✅    |
+| `play`                         | ✅  |   ✅    |
+| `playAppleMusicSongById`       | ✅  |   ❌    |
+| `playLocalSongById`            | ✅  |   ❌    |
+| `setAppleMusicQueue`           | ✅  |   ❌    |
+| `setLocalMusicQueue`           | ✅  |   ❌    |
+| `pause`                        | ✅  |   ✅    |
+| `prepareToPlay`                | ✅  |   ❌    |
+| `previous`                     | ✅  |   ✅    |
+| `setPlaybackTime`              | ✅  |   ✅    |
+| `setRepeatMode`                | ✅  |   ✅    |
+| `setShuffleMode`               | ✅  |   ❌    |
+| `skipToBeginning`              | ✅  |   ✅    |
+| `stop`                         | ✅  |   ✅    |
+| `checkIfPremiumApple`          | ✅  |   ❌    |
+| `getStoreFrontCountryCode`     | ✅  |   ❌    |
+| `requestUserToken`             | ✅  |   ❌    |
+| `requestAuthorization`         | ✅  |   ❌    |
+| `getAuthorizationStatus`       | ✅  |   ❌    |
+| `getUserPlaylists`             | ✅  |   ❌    |
+| `getUserSongs`                 | ✅  |   ✅    |
+| `getVolume`                    | ✅  |   ✅    |
+| `setVolume`                    | ✅  |   ✅    |
+| `initializeMusicPlayerAndroid` | ❌  |   ✅    |
 
 ### Event listeners
 
-You can listen to MusicPlayerEvents events.
+You can listen to MusicPlayerEvents events (Currently iOS only).
 
-| MusicPlayerEvents                       |
-| ---------------------------------------- |
-| **`onPlay`**                 |
+| MusicPlayerEvents           |
+| --------------------------- |
+| **`onPlay`**                |
 | **`onPause`**               |
-| **`onNext`**              |
-| **`onStop`**             |
-| **`onPrevious`** |
-| **`onSongChange`**                      |
-| **`systemVolumeDidChange`**            |
+| **`onNext`**                |
+| **`onStop`**                |
+| **`onPrevious`**            |
+| **`onSongChange`**          |
+| **`systemVolumeDidChange`** |
+
 ### Apple Music API Requests
 
 The module also exports **AppleMusicRequests**, which contains predefined requests to fetch data from [Apple Music API](https://developer.apple.com/documentation/applemusicapi/).
