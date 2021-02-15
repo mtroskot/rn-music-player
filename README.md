@@ -12,8 +12,10 @@ npm install rn-music-player
 ### iOS
 
 ```sh
-npm install react-native-swift
-react-native swiftify
+$ npm install react-native-swift
+$ react-native swiftify
+$ cd ios && pod install
+$ react-native run-ios
 ```
 
 Add to your info.plist
@@ -28,6 +30,9 @@ Set Swift version to 4.2 or higher.
 Min supported iOS version 10.3
 
 ### Android
+```sh
+$ react-native run-android
+```
 
 Add to your AndroidManifest
 
